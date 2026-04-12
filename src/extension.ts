@@ -18,9 +18,25 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	// When the document is changed, the list of regions in the document is checked and updated.
-	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(() =>
-	{
-		regionTreeDataProvider.refresh();
+	let refreshTimeout: NodeJS.Timeout | undefined;
+	const scheduleRefresh = () => {
+		if (refreshTimeout) {
+			clearTimeout(refreshTimeout);
+		}
+		refreshTimeout = setTimeout(() => {
+			regionTreeDataProvider.refresh();
+			refreshTimeout = undefined;
+		}, 300); // 300ms debounce
+	};
+
+	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => {
+		regionTreeDataProvider.refresh(); // Immediate refresh on file switch
+	}));
+
+	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e) => {
+		if (e.document === vscode.window.activeTextEditor?.document) {
+			scheduleRefresh(); // Debounced refresh on active document change
+		}
 	}));
 
 	//

@@ -1,114 +1,86 @@
 {
 	"bat": {
-		"start": "^\\s*(::\\s*|REM\\s+)#region(?<name>.*)",
-		"end": "^\\s*(::\\s*|REM\\s+)#endregion"
+		"start": "^\\s*(::\\s*|REM\\s+)#region(?<name>.*)"
 	},
 	"coffeescript": {
-		"start": "^\\s*#region\\b(?<name>.*)",
-		"end": "^\\s*#endregion\\b"
+		"start": "^\\s*#region\\b(?<name>.*)"
 	},
 	"c": {
-		"start": "^\\s*#pragma\\s+region\\b(?<name>.*)",
-		"end": "^\\s*#pragma\\s+endregion\\b"
+		"start": "^\\s*#pragma\\s+region\\b(?<name>.*)"
 	},
 	"cpp": {
-		"start": "^\\s*#pragma\\s+region\\b(?<name>.*)",
-		"end": "^\\s*#pragma\\s+endregion\\b"
+		"start": "^\\s*#pragma\\s+region\\b(?<name>.*)"
 	},
 	"csharp": {
-		"start": "^\\s*#region\\b(?<name>.*)",
-		"end": "^\\s*#endregion\\b"
+		"start": "^\\s*#region\\b(?<name>.*)"
 	},
 	"css": {
-		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/",
-		"end": "^\\s*\\/\\*\\s*#endregion\\b.*\\*\\/"
+		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/"
 	},
 	"fsharp": {
-		"start": "^\\s*//\\s*#region\\b(?<name>.*)|^\\s*\\(\\*\\s*#region(?<nameAlt>.*)\\*\\)",
-		"end": "^\\s*//\\s*#endregion\\b|^\\s*\\(\\*\\s*#endregion\\s*\\*\\)"
+		"start": "^\\s*//\\s*#region\\b(?<name>.*)|^\\s*\\(\\*\\s*#region(?<nameAlt>.*)\\*\\)"
 	},
 	"go": {
-		"start": "^\\s*//\\s*#?region\\b(?<name>.*)",
-		"end": "^\\s*//\\s*#?endregion\\b"
+		"start": "^\\s*//\\s*#?region\\b(?<name>.*)"
 	},
 	"html": {
-		"start": "^\\s*<!--\\s*#region\\b(?<name>.*)-->",
-		"end": "^\\s*<!--\\s*#endregion\\b.*-->"
+		"start": "^\\s*<!--\\s*#region\\b(?<name>.*)-->"
 	},
 	"java": {
-		"start": "^\\s*//\\s*(?:(?:#?region\\b(?<name>.*))",
-		"end": "^\\s*//\\s*(?:(?:#?endregion\\b)"
+		"start": "^\\s*//\\s*(?:(?:#?region\\b(?<name>.*))"
 	},
 	"javascript": {
-		"start": "^\\s*//\\s*#?region\\b(?<name>.*)",
-		"end": "^\\s*//\\s*#?endregion\\b"
+		"start": "^\\s*//\\s*#?region\\b(?<name>.*)"
 	},
 	"javascriptreact": {
-		"start": "^\\s*//\\s*#?region\\b(?<name>.*)",
-		"end": "^\\s*//\\s*#?endregion\\b"
+		"start": "^\\s*//\\s*#?region\\b(?<name>.*)"
 	},
 	"less": {
-		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/",
-		"end": "^\\s*\\/\\*\\s*#endregion\\b.*\\*\\/"
+		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/"
 	},
 	"markdown": {
-		"start": "^\\s*<!--\\s*#?region\\b(?<name>.*)-->",
-		"end": "^\\s*<!--\\s*#?endregion\\b.*-->"
+		"start": "^\\s*<!--\\s*#?region\\b(?<name>.*)-->"
 	},
 	"php": {
-		"start": "^\\s*(#|\/\/)region\\b(?<name>.*)",
-		"end": "^\\s*(#|\/\/)endregion\\b"
+		"start": "^\\s*(#|\/\/)region\\b(?<name>.*)"
 	},
 	"perl": {
-		"start": "^\\s*#region\\b(?<name>.*)",
-		"end": "^\\s*#endregion\\b"
+		"start": "^\\s*#region\\b(?<name>.*)"
 	},
 	"powershell": {
-		"start": "^\\s*#[rR]egion\\b(?<name>.*)",
-		"end": "^\\s*#[eE]nd[rR]egion\\b"
+		"start": "^\\s*#[rR]egion\\b(?<name>.*)"
 	},
 	"python": {
-		"start": "^\\s*#\\s*region\\b(?<name>.*)",
-		"end": "^\\s*#\\s*endregion\\b"
+		"start": "^\\s*#\\s*region\\b(?<name>.*)"
 	},
 	"rust": {
-		"start": "^\\s*//\\s*#?region\\b(?<name>.*)",
-		"end": "^\\s*//\\s*#?endregion\\b"
+		"start": "^\\s*//\\s*#?region\\b(?<name>.*)"
 	},
 	"scss": {
-		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/",
-		"end": "^\\s*\\/\\*\\s*#endregion\\b.*\\*\\/"
+		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/"
 	},
 	"shellscript": {
-		"start": "^\\s*#\\s*#?region\\b(?<name>.*)",
-		"end": "^\\s*#\\s*#?endregion\\b.*"
+		"start": "^\\s*#\\s*#?region\\b(?<name>.*)"
 	},
 	"typescript": {
-		"start": "^\\s*//\\s*#?region\\b(?<name>.*)",
-		"end": "^\\s*//\\s*#?endregion\\b"
+		"start": "^\\s*//\\s*#?region\\b(?<name>.*)"
 	},
 	"typescriptreact": {
-		"start": "^\\s*//\\s*#?region\\b(?<name>.*)",
-		"end": "^\\s*//\\s*#?endregion\\b"
+		"start": "^\\s*//\\s*#?region\\b(?<name>.*)"
 	},
 	"vb": {
-		"start": "^\\s*#Region\\b\\s*\"(?<name>.*)\"",
-		"end": "^\\s*#End Region\\b"
+		"start": "^\\s*#Region\\b\\s*\"(?<name>.*)\""
 	},
 	"xml": {
-		"start": "^\\s*<!--\\s*#region\\b(?<name>.*)-->",
-		"end": "^\\s*<!--\\s*#endregion\\b.*-->"
+		"start": "^\\s*<!--\\s*#region\\b(?<name>.*)-->"
 	},
 	"yaml": {
-		"start": "^\\s*#\\s*region\\b(?<name>.*)",
-		"end": "^\\s*#\\s*endregion\\b"
+		"start": "^\\s*#\\s*region\\b(?<name>.*)"
 	},
 	"delphi": {
-		"start": "^\\s*{\\s*\\$region\\b( '(?<name>.*?)')?}",
-		"end": "^\\s*{\\s*\\$endregion\\b}"
+		"start": "^\\s*{\\s*\\$region\\b( '(?<name>.*?)')?}"
 	},
 	"jsonc": {
-		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/",
-		"end": "^\\s*\\/\\*\\s*#endregion\\b.*\\*\\/"
+		"start": "^\\s*\\/\\*\\s*#region\\b(?<name>.*)\\s*\\*\\/"
 	}
 }
