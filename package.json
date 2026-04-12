@@ -1,10 +1,10 @@
 {
-	"name": "santacodes-region-viewer",
+	"name": "n-region-viewer",
 	"icon": "images/icon.png",
-	"publisher": "SantaCodes",
-	"displayName": "Region Viewer",
+	"publisher": "Leon",
+	"displayName": "nRegion Viewer",
 	"description": "This extension allows you to print a list of regions in a document and select a region to navigate to the document's location.",
-	"version": "1.1.1",
+	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.44.0"
 	},
@@ -20,7 +20,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:regionViewer"
+		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -28,9 +28,26 @@
 			{
 				"title": "Region Viewer",
 				"properties": {
-					"region-viewer.markers-overrides": {
+					"region-viewer": {
 						"type": "object",
-						"scope": "application"
+						"scope": "application",
+						"description": "Override region markers for specific languages and customize colors",
+						"properties": {
+							"colors": {
+								"type": "object",
+								"description": "Customize marker colors",
+								"properties": {
+									"foreground": {
+										"type": "string",
+										"description": "Foreground color for region marker lines (CSS color)"
+									},
+									"background": {
+										"type": "string",
+										"description": "Background color for region marker lines (CSS color)"
+									}
+								}
+							}
+						}
 					}
 				}
 			}

@@ -40,11 +40,14 @@ Once the language id and the regex is ready, it is as simple as adding the follo
 ```json
 {
     /// Other settings
-    "region-viewer.markers-overrides": {
+    "region-viewer": {
         "[language-id]": {
-            "start": "^\\s*//\\s*#?region\\b(?<name>.*)", // <name> will be used to to give the region a name
-            "end": "^\\s*//\\s*#?endregion\\b"
+            "start": "//\\s*MARK:\\s*(?<name>.*)", // <name> will be used to to give the region a name
         },
+        "colors": {
+            "foreground": "#ffffff70",
+            "background": "#ae00ff2d"
+        }
     }
 }
 ```

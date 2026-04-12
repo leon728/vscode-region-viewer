@@ -1,4 +1,8 @@
 {
+	"colors": {
+		"foreground": "#ffffff70",
+		"background": "#ae00ff2d"
+	},
 	"bat": {
 		"start": "^\\s*(::\\s*|REM\\s+)#region(?<name>.*)"
 	},
@@ -9,7 +13,7 @@
 		"start": "^\\s*#pragma\\s+region\\b(?<name>.*)"
 	},
 	"cpp": {
-		"start": "^\\s*#pragma\\s+region\\b(?<name>.*)"
+		"start": "nUtility\\.PrintOut\\(nXML_Verbose, \"(?:\\\\n)?\\s*(?<name>\\[\\d{3}\\] .*)\"\\)"
 	},
 	"csharp": {
 		"start": "^\\s*#region\\b(?<name>.*)"

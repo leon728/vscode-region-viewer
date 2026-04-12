@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as markers from './markers.json';
+import { getStartPattern } from './utils';
 
 export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionItem> {
 	private _onDidChangeTreeData: vscode.EventEmitter<RegionItem | undefined> = new vscode.EventEmitter<RegionItem | undefined>();
@@ -26,21 +26,13 @@ export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionIte
 			return;
 		}
 
-		const config = vscode.workspace.getConfiguration();
-		let markersOverrides: {[lang: string]: { start: string }} | undefined;
-		
-		try {
-			markersOverrides = config.get('region-viewer.markers-overrides');
-		} catch (error) {
-			vscode.window.showWarningMessage('Failed to parse markers overrides for Region Viewer. Check documentation for correct format');
+		const startPattern = getStartPattern(document.languageId);
+		if (!startPattern) {
+			this.data = undefined;
+			return;
 		}
 
-		// Get the start pattern for current language
-		const langId = document.languageId;
-		const startPattern = (markersOverrides?.[langId] ?? (markers as any)[langId])?.start;
-		if (!startPattern) return;
-
-		const startRegExp = new RegExp(startPattern, 'gm');
+		const startRegExp = new RegExp(startPattern, 'g');
 		const text = document.getText();
 		const regions: RegionItem[] = [];
 		let match;
@@ -48,7 +40,8 @@ export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionIte
 		while ((match = startRegExp.exec(text))) {
 			const startPos = document.positionAt(match.index);
 			const name = match.groups?.name?.trim();
-			regions.push(new RegionItem(name ? "## " + name : "## region", startPos.line));
+			// regions.push(new RegionItem(name ? "# " + name : "# region", startPos.line));
+			regions.push(new RegionItem(name ? name : "region", startPos.line));
 		}
 
 		this.data = regions;
@@ -60,6 +53,7 @@ class RegionItem extends vscode.TreeItem {
 	constructor(label: string, line: number) {
 		super(label, vscode.TreeItemCollapsibleState.None);
 
+		this.tooltip = `Line ${line + 1}`;
 		this.command = {
 			title: '',
 			command: 'region-viewer.reveal',

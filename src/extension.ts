@@ -1,49 +1,69 @@
 import * as vscode from 'vscode';
 import { RegionTreeDataProvider } from './regionTreeDataProvider';
+import { RegionDecorator } from './regionDecorator';
 
 export function activate(context: vscode.ExtensionContext) {
 	const regionTreeDataProvider = new RegionTreeDataProvider();
-	context.subscriptions.push(vscode.window.registerTreeDataProvider('regionViewer', regionTreeDataProvider));
+	const regionDecorator = new RegionDecorator();
+
+	// console.log('>> Region Viewer extension is now active!');
+	// vscode.window.showInformationMessage('Region Viewer Extension Loaded!');
+
+	context.subscriptions.push(
+		vscode.window.registerTreeDataProvider('regionViewer', regionTreeDataProvider),
+		regionDecorator
+	);
+
+	// Unified update function
+	const updateAll = () => {
+		regionTreeDataProvider.refresh();
+		regionDecorator.updateDecorations();
+	};
+
+	// Initialize on activation
+	updateAll();
 
 	// If a TreeView item is selected, the cursor moves to that location.
-	context.subscriptions.push(vscode.commands.registerCommand('region-viewer.reveal', (line) =>
-	{
+	context.subscriptions.push(vscode.commands.registerCommand('region-viewer.reveal', (line) => {
 		const editor = vscode.window.activeTextEditor;
-		if (editor == undefined)
-			return;
-			
+		if (!editor) return;
+		
 		const pos = new vscode.Position(line, 0);
 		editor.selection = new vscode.Selection(pos, pos);
 		editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenter);
 	}));
 
-	// When the document is changed, the list of regions in the document is checked and updated.
+	// Handle editor changes
 	let refreshTimeout: NodeJS.Timeout | undefined;
-	const scheduleRefresh = () => {
-		if (refreshTimeout) {
-			clearTimeout(refreshTimeout);
-		}
-		refreshTimeout = setTimeout(() => {
-			regionTreeDataProvider.refresh();
-			refreshTimeout = undefined;
-		}, 300); // 300ms debounce
-	};
+	
+	context.subscriptions.push(
+		vscode.window.onDidChangeActiveTextEditor(() => {
+			updateAll();
+		}),
+		
+		vscode.workspace.onDidChangeTextDocument((e) => {
+			if (e.document !== vscode.window.activeTextEditor?.document) return;
+			
+			if (refreshTimeout) {
+				clearTimeout(refreshTimeout);
+			}
+			refreshTimeout = setTimeout(() => {
+				updateAll();
+				refreshTimeout = undefined;
+			}, 300);
+		}),
 
-	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => {
-		regionTreeDataProvider.refresh(); // Immediate refresh on file switch
-	}));
+		vscode.workspace.onDidChangeConfiguration((e) => {
+			if (e.affectsConfiguration('region-viewer')) {
+				regionDecorator.refreshColors();
+				updateAll();
+			}
+		})
+	);
 
-	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e) => {
-		if (e.document === vscode.window.activeTextEditor?.document) {
-			scheduleRefresh(); // Debounced refresh on active document change
-		}
-	}));
-
-	//
-	context.subscriptions.push(vscode.commands.registerCommand('region-viewer.activeDocumentLanguageId', () =>
-	{
-		var languageId = vscode.window.activeTextEditor?.document?.languageId ?? 'Unknown language';
-
+	// Show active document language ID
+	context.subscriptions.push(vscode.commands.registerCommand('region-viewer.activeDocumentLanguageId', () => {
+		const languageId = vscode.window.activeTextEditor?.document?.languageId ?? 'Unknown language';
 		vscode.window.showInformationMessage(`Language ID for active document: ${languageId}`);
 	}));
 }
