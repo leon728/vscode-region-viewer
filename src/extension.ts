@@ -2,6 +2,21 @@ import * as vscode from 'vscode';
 import { RegionTreeDataProvider } from './regionTreeDataProvider';
 import { RegionDecorator } from './regionDecorator';
 
+/** Center line of the primary vertical viewport (first visible range). */
+function getCenterVisibleLine(visibleRanges: readonly vscode.Range[]): number | undefined {
+	if (visibleRanges.length === 0) {
+		return undefined;
+	}
+	const r = visibleRanges[0];
+	const top = r.start.line;
+	// Range end is typically exclusive at column 0 on the line after the last visible line.
+	let bottom = r.end.line;
+	if (r.end.character === 0 && bottom > top) {
+		bottom -= 1;
+	}
+	return Math.floor((top + bottom) / 2);
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	const regionTreeDataProvider = new RegionTreeDataProvider();
 	const regionDecorator = new RegionDecorator();
@@ -46,8 +61,8 @@ export function activate(context: vscode.ExtensionContext) {
 	updateAll();
 	syncRegionViewerMenuContext();
 
-	// Follow cursor: reveal the closest region in tree view when cursor moves
-	const followCursor = () => {
+	// Follow cursor: reveal the closest region in tree view when cursor moves or viewport scrolls
+	const followCursor = (referenceLine?: number) => {
 		// Check if follow cursor is enabled
 		const followCursorEnabled = vscode.workspace.getConfiguration('region-viewer').get<boolean>('followCursor', true);
 		if (!followCursorEnabled) return;
@@ -58,8 +73,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// Do not call reveal when the view is hidden — reveal would show/focus the tree view.
 		if (!treeView.visible) return;
 
-		const cursorLine = editor.selection.active.line;
-		const closestRegion = regionTreeDataProvider.findClosestRegion(cursorLine);
+		const line = referenceLine ?? editor.selection.active.line;
+		const closestRegion = regionTreeDataProvider.findClosestRegion(line);
 		
 		if (closestRegion) {
 			// Reveal with expand to ensure visibility
@@ -83,7 +98,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// Handle editor changes
 	let refreshTimeout: NodeJS.Timeout | undefined;
 	let followCursorTimeout: NodeJS.Timeout | undefined;
-	
+	let visibleRangesFollowTimeout: NodeJS.Timeout | undefined;
+	/** Skip viewport-based follow briefly after a selection change so auto-scroll does not override cursor. */
+	let lastSelectionChangeAt = 0;
+
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor(() => {
 			updateAll();
@@ -108,7 +126,9 @@ export function activate(context: vscode.ExtensionContext) {
 		// Follow cursor when selection changes
 		vscode.window.onDidChangeTextEditorSelection((e) => {
 			if (e.textEditor !== vscode.window.activeTextEditor) return;
-			
+
+			lastSelectionChangeAt = Date.now();
+
 			// Debounce to avoid excessive updates
 			if (followCursorTimeout) {
 				clearTimeout(followCursorTimeout);
@@ -116,6 +136,33 @@ export function activate(context: vscode.ExtensionContext) {
 			followCursorTimeout = setTimeout(() => {
 				followCursor();
 				followCursorTimeout = undefined;
+			}, 150);
+		}),
+
+		// When the viewport scrolls, follow the region closest to the center visible line
+		vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
+			if (e.textEditor !== vscode.window.activeTextEditor) return;
+
+			if (Date.now() - lastSelectionChangeAt < 120) {
+				return;
+			}
+
+			if (visibleRangesFollowTimeout) {
+				clearTimeout(visibleRangesFollowTimeout);
+			}
+			visibleRangesFollowTimeout = setTimeout(() => {
+				const editor = vscode.window.activeTextEditor;
+				if (!editor || editor !== e.textEditor) {
+					visibleRangesFollowTimeout = undefined;
+					return;
+				}
+				const centerLine = getCenterVisibleLine(editor.visibleRanges);
+				if (centerLine === undefined) {
+					visibleRangesFollowTimeout = undefined;
+					return;
+				}
+				followCursor(centerLine);
+				visibleRangesFollowTimeout = undefined;
 			}, 150);
 		}),
 
