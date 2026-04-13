@@ -14,12 +14,6 @@ export class RegionDecorator {
 		}
 
 		const colors = getMarkerColors();
-		if (!colors) {
-			// if color is null, it means decorator is disabled, so we create a dummy decoration type that does nothing
-			this.decorationType = vscode.window.createTextEditorDecorationType({});
-			return;
-		}
-		
 		this.decorationType = vscode.window.createTextEditorDecorationType({
 			isWholeLine: true,
 			fontWeight: "bold",
@@ -29,38 +23,38 @@ export class RegionDecorator {
 	}
 
 	public updateDecorations(): void {
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) {
-			return;
+		const showDecorations = vscode.workspace.getConfiguration('region-viewer').get<boolean>('showDecorations', true);
+
+		for (const editor of vscode.window.visibleTextEditors) {
+			if (!showDecorations) {
+				editor.setDecorations(this.decorationType, []);
+				continue;
+			}
+
+			const startPattern = getStartPattern(editor.document.languageId);
+			if (!startPattern) {
+				editor.setDecorations(this.decorationType, []);
+				continue;
+			}
+
+			const text = editor.document.getText();
+			const decorations: vscode.DecorationOptions[] = [];
+			const regEx = new RegExp(startPattern, 'g');
+			let match: RegExpExecArray | null;
+
+			while ((match = regEx.exec(text)) !== null) {
+				const startPos = editor.document.positionAt(match.index);
+				decorations.push({ range: new vscode.Range(startPos, startPos) });
+			}
+
+			editor.setDecorations(this.decorationType, decorations);
 		}
-
-		// if decorator is disabled, clear decorations and return early
-		if (!getMarkerColors()) {
-			editor.setDecorations(this.decorationType, []);
-			return;
-		}
-
-		const startPattern = getStartPattern(editor.document.languageId);
-		if (!startPattern) {
-			editor.setDecorations(this.decorationType, []);
-			return;
-		}
-
-		const text = editor.document.getText();
-		const decorations: vscode.DecorationOptions[] = [];
-		const regEx = new RegExp(startPattern, 'g');
-		let match: RegExpExecArray | null;
-
-		while ((match = regEx.exec(text)) !== null) {
-			const startPos = editor.document.positionAt(match.index);
-			decorations.push({ range: new vscode.Range(startPos, startPos) });
-		}
-
-		editor.setDecorations(this.decorationType, decorations);
 	}
 
 	public refreshColors(): void {
 		this.updateDecorationType();
+		// New decoration type starts with no ranges; re-apply to the active editor.
+		this.updateDecorations();
 	}
 
 	public dispose(): void {

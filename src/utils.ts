@@ -13,17 +13,14 @@ export interface MarkerColors {
 }
 
 /**
- * @returns MarkerColors null if decorator is disabled, otherwise returns the colors to use for decorations
+ * @returns MarkerColors the colors to use for decorations
  */
-export function getMarkerColors(): MarkerColors | null {
-	const config = vscode.workspace.getConfiguration();
-	const colorsOverride = config.get<MarkerColors>('region-viewer.colors');
-	
-	// if colors is set to an empty object {}, disable the decorator
-	if (colorsOverride && Object.keys(colorsOverride).length === 0) {
-		return null;
-	}
-	
+export function getMarkerColors(): MarkerColors {
+	// Nested keys under contributed "region-viewer" object must be read via that section,
+	// otherwise workspace merges may not resolve "region-viewer.colors" reliably.
+	const regionConfig = vscode.workspace.getConfiguration('region-viewer');
+	const colorsOverride = regionConfig.get<Partial<MarkerColors>>('colors');
+
 	return {
 		foreground: colorsOverride?.foreground ?? (markers as any).colors.foreground,
 		background: colorsOverride?.background ?? (markers as any).colors.background

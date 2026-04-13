@@ -28,6 +28,16 @@
 			{
 				"title": "Region Viewer",
 				"properties": {
+					"region-viewer.followCursor": {
+						"type": "boolean",
+						"default": true,
+						"description": "Automatically reveal the region at the cursor position"
+					},
+					"region-viewer.showDecorations": {
+						"type": "boolean",
+						"default": true,
+						"description": "Show decorations on region marker lines"
+					},
 					"region-viewer": {
 						"type": "object",
 						"scope": "application",
@@ -68,15 +78,61 @@
 				"title": "Active Document Language ID",
 				"category": "Region Viewer",
 				"icon": "$(extensions-info-message)"
+			},
+			{
+				"command": "region-viewer.followCursor.on",
+				"title": "✓ Follow Cursor",
+				"category": "Region Viewer"
+			},
+			{
+				"command": "region-viewer.followCursor.off",
+				"title": "  Follow Cursor",
+				"category": "Region Viewer"
+			},
+			{
+				"command": "region-viewer.showDecorations.on",
+				"title": "✓ Show Decorations",
+				"category": "Region Viewer"
+			},
+			{
+				"command": "region-viewer.showDecorations.off",
+				"title": "  Show Decorations",
+				"category": "Region Viewer"
 			}
 		],
 		"menus": {
 			"view/title": [
 				{
+					"command": "region-viewer.followCursor.on",
+					"when": "view == regionViewer && regionViewer.followCursor",
+					"group": "1_config@1"
+				},
+				{
+					"command": "region-viewer.followCursor.off",
+					"when": "view == regionViewer && !regionViewer.followCursor",
+					"group": "1_config@1"
+				},
+				{
+					"command": "region-viewer.showDecorations.on",
+					"when": "view == regionViewer && regionViewer.showDecorations",
+					"group": "1_config@2"
+				},
+				{
+					"command": "region-viewer.showDecorations.off",
+					"when": "view == regionViewer && !regionViewer.showDecorations",
+					"group": "1_config@2"
+				},
+				{
 					"command": "region-viewer.activeDocumentLanguageId",
 					"when": "view == regionViewer",
 					"group": "navigation"
 				}
+			],
+			"commandPalette": [
+				{ "command": "region-viewer.followCursor.on", "when": "false" },
+				{ "command": "region-viewer.followCursor.off", "when": "false" },
+				{ "command": "region-viewer.showDecorations.on", "when": "false" },
+				{ "command": "region-viewer.showDecorations.off", "when": "false" }
 			]
 		}
 	},

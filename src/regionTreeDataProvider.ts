@@ -6,6 +6,24 @@ export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionIte
 	readonly onDidChangeTreeData: vscode.Event<RegionItem | undefined> = this._onDidChangeTreeData.event;
 	private data?: RegionItem[];
 
+	// Find the closest region item for the given line number (searching upwards)
+	findClosestRegion(lineNumber: number): RegionItem | undefined {
+		if (!this.data || this.data.length === 0) {
+			return undefined;
+		}
+
+		// Find the closest region at or before the cursor line
+		let closestRegion: RegionItem | undefined;
+		for (const region of this.data) {
+			if (region.line <= lineNumber) {
+				if (!closestRegion || region.line > closestRegion.line) {
+					closestRegion = region;
+				}
+			}
+		}
+		return closestRegion;
+	}
+
 	refresh(): void {
 		this.findRegions();
 		this._onDidChangeTreeData.fire();
@@ -17,6 +35,11 @@ export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionIte
 
 	getChildren(element?: RegionItem): RegionItem[] | undefined {
 		return element ? undefined : this.data;
+	}
+
+	getParent(element: RegionItem): RegionItem | undefined {
+		// Flat list - no parent hierarchy
+		return undefined;
 	}
 
 	private findRegions(): void {
@@ -49,9 +72,11 @@ export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionIte
 }
 
 class RegionItem extends vscode.TreeItem {
+	public readonly line: number;
 
 	constructor(label: string, line: number) {
 		super(label, vscode.TreeItemCollapsibleState.None);
+		this.line = line;
 
 		this.tooltip = `Line ${line + 1}`;
 		this.command = {
