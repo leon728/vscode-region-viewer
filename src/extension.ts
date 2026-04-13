@@ -62,7 +62,10 @@ export function activate(context: vscode.ExtensionContext) {
 	syncRegionViewerMenuContext();
 
 	// Follow cursor: reveal the closest region in tree view when cursor moves or viewport scrolls
+	// let followCursorCallCount = 0;
 	const followCursor = (referenceLine?: number) => {
+		// console.log(`followCursor called (total: ${++followCursorCallCount})`);
+
 		// Check if follow cursor is enabled
 		const followCursorEnabled = vscode.workspace.getConfiguration('region-viewer').get<boolean>('followCursor', true);
 		if (!followCursorEnabled) return;
@@ -76,12 +79,25 @@ export function activate(context: vscode.ExtensionContext) {
 		const line = referenceLine ?? editor.selection.active.line;
 		const closestRegion = regionTreeDataProvider.findClosestRegion(line);
 		
+		// Reveal the closest region in the tree view.
 		if (closestRegion) {
-			// Reveal with expand to ensure visibility
-			treeView.reveal(closestRegion, { select: true, focus: false, expand: true }).then(
-				() => { console.log('Reveal succeeded'); },
-				(error) => { console.log('Reveal failed:', error); }
-			);
+			// Without focus to avoid stealing focus from the editor. selected item will not be centered in the tree view
+			treeView.reveal(closestRegion, { select: true, focus: false, expand: false });
+
+			// Focus the tree view item, selected item will be centered in the tree view
+			// focus is returned to the editor, but typing might be briefly interrupted by the focus change
+			// treeView.reveal(closestRegion, { select: true, focus: true, expand: false }).then(
+			// 	async () => {
+			// 		// Return focus to the editor
+			// 		if (editor) {
+			// 			await vscode.window.showTextDocument(editor.document, { 
+			// 				viewColumn: editor.viewColumn, 
+			// 				preserveFocus: false,
+			// 				preview: false
+			// 			});
+			// 		}
+			// 	}
+			// );
 		}
 	};
 
@@ -98,6 +114,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// Handle editor changes
 	let refreshTimeout: NodeJS.Timeout | undefined;
 	let followCursorTimeout: NodeJS.Timeout | undefined;
+
+	//-- For scroll-based follow
 	let visibleRangesFollowTimeout: NodeJS.Timeout | undefined;
 	/** Skip viewport-based follow briefly after a selection change so auto-scroll does not override cursor. */
 	let lastSelectionChangeAt = 0;
@@ -139,6 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}, 150);
 		}),
 
+		//-- For scroll-based follow
 		// When the viewport scrolls, follow the region closest to the center visible line
 		vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
 			if (e.textEditor !== vscode.window.activeTextEditor) return;
@@ -163,7 +182,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 				followCursor(centerLine);
 				visibleRangesFollowTimeout = undefined;
-			}, 150);
+			}, 5/* 150 */);
 		}),
 
 		vscode.workspace.onDidChangeConfiguration((e) => {
@@ -177,27 +196,17 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// Toggle follow cursor setting
-	const toggleFollowCursor = () => {
+	const toggleConfig = (key: string) => {
 		const config = vscode.workspace.getConfiguration('region-viewer');
-		const newValue = !config.get<boolean>('followCursor', true);
-		config.update('followCursor', newValue, vscode.ConfigurationTarget.Global);
-	};
-
-	// Toggle show decorations setting
-	const toggleShowDecorations = () => {
-		const config = vscode.workspace.getConfiguration('region-viewer');
-		const newValue = !config.get<boolean>('showDecorations', true);
-		void config
-			.update('showDecorations', newValue, vscode.ConfigurationTarget.Global)
-			.then(() => regionDecorator.updateDecorations());
+		void config.update(key, !config.get<boolean>(key, true), vscode.ConfigurationTarget.Global);
+		// onDidChangeConfiguration handles any follow-up (syncRegionViewerMenuContext / refreshColors).
 	};
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('region-viewer.followCursor.on', toggleFollowCursor),
-		vscode.commands.registerCommand('region-viewer.followCursor.off', toggleFollowCursor),
-		vscode.commands.registerCommand('region-viewer.showDecorations.on', toggleShowDecorations),
-		vscode.commands.registerCommand('region-viewer.showDecorations.off', toggleShowDecorations)
+		vscode.commands.registerCommand('region-viewer.followCursor.on', () => toggleConfig('followCursor')),
+		vscode.commands.registerCommand('region-viewer.followCursor.off', () => toggleConfig('followCursor')),
+		vscode.commands.registerCommand('region-viewer.showDecorations.on', () => toggleConfig('showDecorations')),
+		vscode.commands.registerCommand('region-viewer.showDecorations.off', () => toggleConfig('showDecorations'))
 	);
 
 	// Show active document language ID

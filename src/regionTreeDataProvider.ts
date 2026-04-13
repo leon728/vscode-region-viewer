@@ -12,15 +12,23 @@ export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionIte
 			return undefined;
 		}
 
-		// Find the closest region at or before the cursor line
+		// Find the closest region at or before the cursor line (binary search)
+		let lo = 0, hi = this.data.length - 1;
 		let closestRegion: RegionItem | undefined;
-		for (const region of this.data) {
-			if (region.line <= lineNumber) {
-				if (!closestRegion || region.line > closestRegion.line) {
-					closestRegion = region;
-				}
+		while (lo <= hi) {
+			const mid = (lo + hi) >>> 1;
+			if (this.data[mid].line <= lineNumber) {
+				closestRegion = this.data[mid];
+				lo = mid + 1;
+			} else {
+				hi = mid - 1;
 			}
 		}
+		// set to [0] if no region is before the cursor line, otherwise the closest region found
+		if (!closestRegion) {
+			closestRegion = this.data[0];
+		}
+		// console.log('Closest region for line', lineNumber, 'is', closestRegion?.label, 'at line', closestRegion?.line);
 		return closestRegion;
 	}
 

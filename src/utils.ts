@@ -7,19 +7,11 @@ export function getStartPattern(languageId: string): string | undefined {
 	return markersOverrides?.[languageId]?.start ?? (markers as any)[languageId]?.start;
 }
 
-export interface MarkerColors {
-	foreground: string;
-	background: string;
-}
-
-/**
- * @returns MarkerColors the colors to use for decorations
- */
-export function getMarkerColors(): MarkerColors {
+export function getMarkerColors() {
 	// Nested keys under contributed "region-viewer" object must be read via that section,
 	// otherwise workspace merges may not resolve "region-viewer.colors" reliably.
 	const regionConfig = vscode.workspace.getConfiguration('region-viewer');
-	const colorsOverride = regionConfig.get<Partial<MarkerColors>>('colors');
+	const colorsOverride = regionConfig.get<{ foreground?: string; background?: string }>('colors');
 
 	return {
 		foreground: colorsOverride?.foreground ?? (markers as any).colors.foreground,
