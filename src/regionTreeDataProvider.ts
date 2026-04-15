@@ -34,7 +34,7 @@ export class RegionTreeDataProvider implements vscode.TreeDataProvider<RegionIte
 
 	refresh(): void {
 		this.findRegions();
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(undefined);
 	}
   
 	getTreeItem(element: RegionItem): vscode.TreeItem {
